@@ -23,17 +23,17 @@ def read_from_tokens(tokens: list, E=[], level=0) -> Exp:
     # for the beginning of an expression, add sub-expression to the array
     current_token = tokens.pop(0)
     if current_token == '(':
-        # read a new expression and put it into E
+        entry = level
         level += 1
-        while len(tokens) and tokens[0] != ')':
+        if entry < level:
+        # read a new expression and put it into E
             E.append(read_from_tokens(tokens,[],level))
             level -= 1
         return E
     # for atom, process it and add it to E, then continue recursive iteration
     elif current_token == ')':
         if level > 0:
-            print(E)
-            return E
+            return read_from_tokens(tokens, E, level)
         else:
             raise SyntaxError('Invalid close paren.')
     else:
@@ -52,5 +52,5 @@ def atom(token: str) -> Atom:
         except:
             return Symbol(token)
 
-result = parse("3 (5 3) 6 (5)")
+result = parse("(5) (5)")
 print(result)
