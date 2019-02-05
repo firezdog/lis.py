@@ -12,34 +12,26 @@ def parse(program: str) -> Exp:
     "tokenize() string and read_from_tokens() to generate tree."
     return read_from_tokens(tokenize(program))
 
-def read_from_tokens(tokens: list, E=[], level=0) -> Exp:
+def read_from_tokens(tokens: list) -> Exp:
     "convert a string into a tree-like expression"
-    # base case: the list is empty.
     if len(tokens) == 0:
-        if level == 0:
-            return E
-        else:
-            raise SyntaxError('Unclosed paren.')
-    # for the beginning of an expression, add sub-expression to the array
-    current_token = tokens.pop(0)
-    if current_token == '(':
-        entry = level
-        level += 1
-        if entry < level:
-        # read a new expression and put it into E
-            E.append(read_from_tokens(tokens,[],level))
-            level -= 1
+        raise SyntaxError("Unexpected EOF")
+    token = tokens.pop(0)
+    if token == "(":
+        E = []
+        try:
+            while tokens[0] != ")":
+                E.append(read_from_tokens(tokens))
+        except:
+            # if there's no closing parenthesis, while never terminates and tokens has no 0 index.
+            raise SyntaxError("No closing parenthesis.")
+        # if this isn't here, program terminates on first close paren it encounters ???
+        tokens.pop(0)
         return E
-    # for atom, process it and add it to E, then continue recursive iteration
-    elif current_token == ')':
-        if level > 0:
-            return read_from_tokens(tokens, E, level)
-        else:
-            raise SyntaxError('Invalid close paren.')
+    elif token == ")":
+        raise SyntaxError("Unexpected close parenthesis")
     else:
-        A = atom(current_token)
-        E.append(A)
-        return read_from_tokens(tokens, E, level)
+        return atom(token)
 
 def atom(token: str) -> Atom:
     # first try to convert token to int, failing that float, failing that string
@@ -52,5 +44,5 @@ def atom(token: str) -> Atom:
         except:
             return Symbol(token)
 
-result = parse("(5) (5)")
+result = parse("((3) (4))")
 print(result)
