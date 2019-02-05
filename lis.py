@@ -12,36 +12,35 @@ def parse(program: str) -> Exp:
     "tokenize() string and read_from_tokens() to generate tree."
     return read_from_tokens(tokenize(program))
 
-def read_from_tokens(tokens: list, E=[]) -> Exp:
+def read_from_tokens(tokens: list) -> Exp:
     "convert a string into a tree-like expression"
     # base case: the list is empty.
     if len(tokens) == 0:
-        return E
+        raise SyntaxError('Unexpected EOF')
     # for the beginning of an expression, add sub-expression to the array
     now = tokens.pop(0)
     if now == '(':
         # read a new expression and put it into E
+        E = []
         while len(tokens) and tokens[0] != ')':
-            E.append(read_from_tokens(tokens,[]))
+            E.append(read_from_tokens(tokens))
         return E
     # for atom, process it and add it to E, then continue recursive iteration
-    elif now == ')':
-        return E
+    if now == ')':
+        raise SyntaxError('Invalid entry')
     else:
-        A = atom(now)
-        E.append(A)
-        return read_from_tokens(tokens, E)
+        return atom(now)
 
 def atom(token: str) -> Atom:
     # first try to convert token to int, failing that float, failing that string
     try:
         return int(token)
     except:
-        # this is not ideal
+        # this is not ideal!
         try:
             return float(token)
         except:
-            return token
+            return Symbol(token)
 
-result = parse("3 4 )")
+result = parse("(3(3(3)))")
 print(result)
