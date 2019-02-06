@@ -1,3 +1,6 @@
+import math
+import operator as op
+
 Symbol = str # A Symbol is a string.
 Number = (int, float) # A Number is an int or a float.
 Atom = (Symbol, Number) # An Atom is a symbol or a number.
@@ -44,5 +47,39 @@ def atom(token: str) -> Atom:
         except:
             return Symbol(token)
 
-result = parse("((3) (4))")
-print(result)
+# we use a dictionary to interpret symbols
+def standard_env():
+    env = {}
+    env.update(vars(math))
+    env.update({
+        # mathematical operators
+        '+': op.add, '-': op.sub, '*': op.mul, '/': op.truediv, 
+        '%': op.mod, '>': op.gt, '>=': op.ge, '<=': op.le,
+        '=': op.eq
+    })
+    return env
+
+global_env = standard_env()
+
+def eval(x: Exp, env=global_env) -> Exp:
+    "Evaluate an expression in an environment."
+    if isinstance(x, Number):
+        return x
+    elif isinstance(x, Symbol):
+        return env[x]
+    # otherwise it's a list...
+    else:
+        # the first entry in the list is one of our functions
+        func = eval(x[0], env)
+        # evaluate everything else
+        args = [eval(arg, env) for arg in x[1:]]
+        # this all assumes well-formed input
+        return func(*args)
+
+# REPL
+while True:
+    entry = input("lispy> ")
+    try:
+        print(eval(parse(entry)))
+    except:
+        print("Error: malformed input.")
