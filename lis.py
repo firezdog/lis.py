@@ -78,7 +78,7 @@ def eval(x: Exp, env=global_env) -> Exp:
 
 # REPL
 while True:
-    entry = input("lispy> ")
+    entry = input("lispy>> ")
     try:
         print(eval(parse(entry)))
     except:
