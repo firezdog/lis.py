@@ -82,4 +82,4 @@ while True:
     try:
         print(eval(parse(entry)))
     except:
-        print("Error: malformed input.")
+        print("Error: malformed input!")
