@@ -13,7 +13,21 @@ def tokenize (chars: str) -> List:
 
 def parse(program: str) -> Exp:
     "tokenize() string and read_from_tokens() to generate tree."
-    return read_from_tokens(tokenize(program))
+    output = read_from_tokens_recursively(tokenize(program), [])
+    return output[0]
+
+def read_from_tokens_recursively(tokens: List, E: List) -> Exp:
+    if len(tokens) == 0:
+        return E
+    token = tokens.pop(0)
+    if token == "(":
+        E.append(read_from_tokens_recursively(tokens, []))
+        return read_from_tokens_recursively(tokens, E)
+    elif token == ")":
+        return E
+    else:
+        E.append(int_or_not(token))    
+        return read_from_tokens_recursively(tokens, E)
 
 def read_from_tokens(tokens: list) -> Exp:
     "convert a string into a tree-like expression"
@@ -34,18 +48,20 @@ def read_from_tokens(tokens: list) -> Exp:
     elif token == ")":
         raise SyntaxError("Unexpected close parenthesis")
     else:
-        return atom(token)
+        return int_or_not(token)
 
-def atom(token: str) -> Atom:
+def int_or_not(token: str) -> Atom:
     # first try to convert token to int, failing that float, failing that string
     try:
         return int(token)
     except:
-        # this is not ideal!
-        try:
-            return float(token)
-        except:
-            return Symbol(token)
+        return float_or_sym(token)
+
+def float_or_sym(token):
+    try:
+        return float(token)
+    except:
+        return Symbol(token)
 
 # we use a dictionary to interpret symbols
 def standard_env():
@@ -78,8 +94,9 @@ def eval(x: Exp, env=global_env) -> Exp:
 
 # REPL
 while True:
-    entry = input("lispy> ")
+    entry = input("$lispy ")
     try:
+        print(parse(entry))
         print(eval(parse(entry)))
     except:
         print("Error: malformed input!")
