@@ -69,9 +69,16 @@ def standard_env():
     env.update(vars(math))
     env.update({
         # mathematical operators
-        '+': op.add, '-': op.sub, '*': op.mul, '/': op.truediv, 
-        '%': op.mod, '>': op.gt, '>=': op.ge, '<=': op.le,
-        '=': op.eq
+        '+': op.add, 
+        '-': op.sub, 
+        '*': op.mul, 
+        '/': op.truediv, 
+        '%': op.mod, 
+        '>': op.gt, 
+        '>=': op.ge, 
+        '<=': op.le,
+        '=': op.eq,
+        'user_defined': {}
     })
     return env
 
@@ -82,8 +89,17 @@ def eval(x: Exp, env=global_env) -> Exp:
     if isinstance(x, Number):
         return x
     elif isinstance(x, Symbol):
-        return env[x]
-    # otherwise it's a list...
+        return env[x] if x in env else env['user_defined'][x]
+    elif x[0] == 'define':
+        # remember, x should be a triple consisting of 'define', a symbol, and an expression
+        # so we throw away 'define' and set the value for env[<symbol>] = eval(expression).
+        # original solution has the disadvantage that it allows the user to define away things like '+' --
+        # so I put the symbol in a user dictionary where namespace collisions can do no harm.
+        # downside -- user enters 'user_defined' as a symbol...
+        (_, definiendum, exp) = x
+        definiens = eval(exp, env)
+        env['user_defined'][definiendum] = definiens
+        return "{} = {}".format(definiendum, definiens)
     else:
         # the first entry in the list is one of our functions
         func = eval(x[0], env)
@@ -96,7 +112,6 @@ def eval(x: Exp, env=global_env) -> Exp:
 while True:
     entry = input("lispy> ")
     try:
-        print(parse(entry))
         print(eval(parse(entry)))
     except:
         print("Error: malformed input!")
