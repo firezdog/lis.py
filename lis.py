@@ -78,7 +78,17 @@ def standard_env():
         '>=': op.ge, 
         '<=': op.le,
         '=': op.eq,
-        'user_defined': {}
+        # environment for user defined variables (and ops?)
+        'user_defined': {},
+        # ops
+        'abs': abs,
+        'append': lambda sequence, item: sequence.append(item), # originally op.add, but that seems redundant with above and this makes more sense given commands below
+        'apply': lambda proc, args: proc(*args), # applies a process to a *list* of arguments
+        'begin': lambda *x: x[-1], # returns the last argument in a series
+        'car': lambda *x: x[0], # returns the first argument in a series
+        'cdr': lambda *x: x[1:], # returns everything from second element in a series
+        'cons': lambda x, y: [x] + y, # appends element x to the list y
+        'list': lambda *x: list(x)
     })
     return env
 
@@ -121,6 +131,10 @@ def eval(x: Exp, env=global_env) -> Exp:
 while True:
     entry = input("lispy> ")
     try:
-        print(eval(parse(entry)))
+        output = eval(parse(entry))
+        if output == None:
+            print("Completed.")
+        else:
+            print(output)
     except:
         print("Error: malformed input!")
