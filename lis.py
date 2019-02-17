@@ -89,7 +89,12 @@ def eval(x: Exp, env=global_env) -> Exp:
     if isinstance(x, Number):
         return x
     elif isinstance(x, Symbol):
-        return env[x] if x in env else env['user_defined'][x]
+        if x in env:
+            return env[x] 
+        elif x in env['user_defined']:
+            return eval(x, env['user_defined'])
+        else:
+            return x
     elif x[0] == 'define':
         # remember, x should be a triple consisting of 'define', a symbol, and an expression
         # so we throw away 'define' and set the value for env[<symbol>] = eval(expression).
@@ -101,11 +106,9 @@ def eval(x: Exp, env=global_env) -> Exp:
         env['user_defined'][definiendum] = definiens
         return "{} = {}".format(definiendum, definiens)
     elif x[0] == 'if':
-        (_, condition, consequence) = x
-        if eval(condition, env):
-            return eval(consequence)
-        else:
-            return "None."
+        (_, condition, consequence, alternative) = x
+        result = consequence if eval(condition, env) else alternative
+        return eval(result, env)
     else:
         # the first entry in the list is one of our functions
         func = eval(x[0], env)
