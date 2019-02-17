@@ -100,6 +100,12 @@ def eval(x: Exp, env=global_env) -> Exp:
         definiens = eval(exp, env)
         env['user_defined'][definiendum] = definiens
         return "{} = {}".format(definiendum, definiens)
+    elif x[0] == 'if':
+        (_, condition, consequence) = x
+        if eval(condition, env):
+            return eval(consequence)
+        else:
+            return "None."
     else:
         # the first entry in the list is one of our functions
         func = eval(x[0], env)
