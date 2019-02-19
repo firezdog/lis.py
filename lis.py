@@ -1,6 +1,24 @@
 import math
 import operator as op
 
+import atexit
+import os
+import readline
+import rlcompleter
+
+# taken from https://docs.python.org/2/tutorial/interactive.html -- make the prompt more user friendly
+historyPath = os.path.expanduser("~/.pyhistory")
+
+def save_history(historyPath=historyPath):
+    import readline
+    readline.write_history_file(historyPath)
+
+if os.path.exists(historyPath):
+    readline.read_history_file(historyPath)
+
+atexit.register(save_history)
+del os, atexit, readline, rlcompleter, save_history, historyPath
+
 Symbol = str # A Symbol is a string.
 Number = (int, float) # A Number is an int or a float.
 Atom = (Symbol, Number) # An Atom is a symbol or a number.
@@ -78,17 +96,24 @@ def standard_env():
         '>=': op.ge, 
         '<=': op.le,
         '=': op.eq,
+        'abs': abs,
+
         # environment for user defined variables (and ops?)
         'user_defined': {},
+
         # ops
-        'abs': abs,
         'append': lambda sequence, item: sequence.append(item), # originally op.add, but that seems redundant with above and this makes more sense given commands below
         'apply': lambda proc, args: proc(*args), # applies a process to a *list* of arguments
-        'begin': lambda *x: x[-1], # returns the last argument in a series
-        'car': lambda *x: x[0], # returns the first argument in a series
-        'cdr': lambda *x: x[1:], # returns everything from second element in a series
-        'cons': lambda x, y: [x] + y, # appends element x to the list y
-        'list': lambda *x: list(x)
+        'begin': lambda *x: x[-1], # returns the last argument in a series, 'begin' is the Scheme version of 'progn' -- each argument in a series is evaluated in turn and the last result is returned (doesn't seem to be what this is doing...)
+
+        'nil': [],
+        'car': lambda *x: x[0], # returns the "data" for a given "node" (see Readme)
+        'cdr': lambda *x: x[1:], # returns the "next" for a given "node" (see Readme)
+        'cons': lambda x, y: [x] + y, # creates a cons from an expression x and a cons, y (see Readme).
+        'list': lambda *x: list(x), # creates a list -- note that (list 1 2 3) is equivalent to (cons 3 (cons 2 (cons 1 (cons nil)))) -- where 'nil' denotes the empty list.
+
+        'procedure?': callable,
+
     })
     return env
 
@@ -136,5 +161,7 @@ while True:
             print("Completed.")
         else:
             print(output)
+    except SyntaxError as e:
+        print(e)
     except:
         print("Error: malformed input!")
