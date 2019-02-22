@@ -86,7 +86,7 @@ def standard_env():
     env = {}
     env.update(vars(math))
     env.update({
-        # mathematical operators
+        # mathematical operations
         '+': op.add, 
         '-': op.sub, 
         '*': op.mul, 
@@ -97,23 +97,36 @@ def standard_env():
         '<=': op.le,
         '=': op.eq,
         'abs': abs,
+        'max': max,
+        'min': min,
+        'round': round,
 
         # environment for user defined variables (and ops?)
         'user_defined': {},
 
-        # ops
-        'append': lambda sequence, item: sequence.append(item), # originally op.add, but that seems redundant with above and this makes more sense given commands below
+        # remember that for "lambda x: ...", x is already evaluated!
         'apply': lambda proc, args: proc(*args), # applies a process to a *list* of arguments
-        'begin': lambda *x: x[-1], # returns the last argument in a series, 'begin' is the Scheme version of 'progn' -- each argument in a series is evaluated in turn and the last result is returned (doesn't seem to be what this is doing...)
+        'map': lambda *args: list(map(*args)), # map() returns an object of class "map" (an iterable...) so we have to convert that back into a list.  The first arg defines the operation to apply, the remaining the expression to apply it to -- i think -- try (map + (list 1 2 3) (list 1 2 3)) => [2,4,6]!
 
         'nil': [],
         'car': lambda *x: x[0], # returns the "data" for a given "node" (see Readme)
         'cdr': lambda *x: x[1:], # returns the "next" for a given "node" (see Readme)
+        'begin': lambda *x: x[-1], # returns the last argument in a series, 'begin' is the Scheme version of 'progn' -- each argument in a series is evaluated in turn and the last result is returned (see the note at the beginning -- in "lambda *x", each x in *x has been evaluated!)
         'cons': lambda x, y: [x] + y, # creates a cons from an expression x and a cons, y (see Readme).
+        'append': op.add,
         'list': lambda *x: list(x), # creates a list -- note that (list 1 2 3) is equivalent to (cons 3 (cons 2 (cons 1 (cons nil)))) -- where 'nil' denotes the empty list.
 
-        'procedure?': callable,
+        # basic logical functions
+        'is?': op.is_,
+        'not': op.not_,
+        'equal?': op.eq, #redundant with '='
 
+        # type predicates
+        'null?': lambda x: x == [],
+        'list?': lambda x: isinstance(x, List),
+        'number?': lambda x: isinstance(x, Number),
+        'symbol?': lambda x: isinstance(x, Symbol),
+        'procedure?': callable,
     })
     return env
 
@@ -161,7 +174,5 @@ while True:
             print("Completed.")
         else:
             print(output)
-    except SyntaxError as e:
+    except BaseException as e:
         print(e)
-    except:
-        print("Error: malformed input!")
