@@ -1,13 +1,13 @@
 import math
 import operator as op
 
+# taken from https://docs.python.org/2/tutorial/interactive.html -- make the prompt more user friendly
 import atexit
 import os
 import readline
 import rlcompleter
 
-# taken from https://docs.python.org/2/tutorial/interactive.html -- make the prompt more user friendly
-historyPath = os.path.expanduser("~/.pyhistory")
+historyPath = os.path.expanduser("~/.python_history")
 
 def save_history(historyPath=historyPath):
     import readline
