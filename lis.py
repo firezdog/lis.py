@@ -143,6 +143,7 @@ def eval(x: Exp, env=global_env) -> Exp:
             return eval(x, env['user_defined'])
         else:
             return x
+    # the expressions, where x is a list
     elif x[0] == 'define':
         # remember, x should be a triple consisting of 'define', a symbol, and an expression
         # so we throw away 'define' and set the value for env[<symbol>] = eval(expression).
@@ -157,6 +158,10 @@ def eval(x: Exp, env=global_env) -> Exp:
         (_, condition, consequence, alternative) = x
         result = consequence if eval(condition, env) else alternative
         return eval(result, env)
+    # return the quoted expression -- 1-ary
+    elif x[0] == 'quote':
+        _, exp = x
+        return exp
     else:
         # the first entry in the list is one of our functions
         func = eval(x[0], env)
