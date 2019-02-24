@@ -1,11 +1,21 @@
 import math
 import operator as op
+from collections import ChainMap as Environment
+
+class Procedure(object):
+    def __init__(self, params, body, env):
+        self.params, self.body, self.env = params, body, env
+    def __call__(self, *args):
+        # Create a dictionary with the params as keys and the function call arguments as values -- use this and the specified environment for the Procedure as the evaluation environment and call eval()
+        env = Environment(dict(zip(self.params, args)), self.env)
+        return eval(self.body, env)
 
 # taken from https://docs.python.org/2/tutorial/interactive.html -- make the prompt more user friendly
 import atexit
 import os
 import readline
 import rlcompleter
+
 
 historyPath = os.path.expanduser("~/.python_history")
 
@@ -162,6 +172,9 @@ def eval(x: Exp, env=global_env) -> Exp:
     elif x[0] == 'quote':
         _, exp = x
         return exp
+    elif x[0] == 'lambda':
+        _, params, body = x
+        return Procedure(params, body, env)
     else:
         # the first entry in the list is one of our functions
         func = eval(x[0], env)
