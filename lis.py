@@ -119,8 +119,8 @@ def standard_env():
         'map': lambda *args: list(map(*args)), # map() returns an object of class "map" (an iterable...) so we have to convert that back into a list.  The first arg defines the operation to apply, the remaining the expression to apply it to -- i think -- try (map + (list 1 2 3) (list 1 2 3)) => [2,4,6]!
 
         'nil': [],
-        'car': lambda *x: x[0], # returns the "data" for a given "node" (see Readme)
-        'cdr': lambda *x: x[1:], # returns the "next" for a given "node" (see Readme)
+        'car': lambda x: x[0], # returns the "data" for a given "node" (see Readme)
+        'cdr': lambda x: x[1:], # returns the "next" for a given "node" (see Readme)
         'begin': lambda *x: x[-1], # returns the last argument in a series, 'begin' is the Scheme version of 'progn' -- each argument in a series is evaluated in turn and the last result is returned (see the note at the beginning -- in "lambda *x", each x in *x has been evaluated!)
         'cons': lambda x, y: [x] + y, # creates a cons from an expression x and a cons, y (see Readme).
         'append': op.add,
